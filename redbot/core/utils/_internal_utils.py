@@ -135,6 +135,14 @@ async def fuzzy_command_search(
 
         if alias:
             return None
+
+    # If term is defined as a tag in the 'Tags' cog, excluding it from fuzzy search.
+    tags_cog = ctx.bot.get_cog("Tags")
+    if tags_cog is not None:
+        tag = tags_cog.get_tag(ctx.guild, term) or tags_cog.get_tag(None, term)
+        if tag:
+            return None
+
     customcom_cog = ctx.bot.get_cog("CustomCommands")
     if customcom_cog is not None:
         cmd_obj = customcom_cog.commandobj
