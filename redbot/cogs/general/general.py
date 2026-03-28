@@ -99,29 +99,78 @@ class General(commands.Cog):
             await ctx.send(choice(choices))
 
     @commands.command()
-    async def roll(self, ctx, number: int = 100):
+    async def roll(self, ctx, number: str = "100"):
         """Roll a random number.
 
         The result will be between 1 and `<number>`.
+        You can also specify a range with `<lower>-<upper>`.
 
         `<number>` defaults to 100.
+
+        **Examples:**
+            - `[p]roll` - Rolls 1 to 100
+            - `[p]roll 50` - Rolls 1 to 50
+            - `[p]roll 50-60` - Rolls 50 to 60
         """
         author = ctx.author
-        if 1 < number <= MAX_ROLL:
-            n = randint(1, number)
+
+        if "-" in number:
+            parts = number.split("-", 1)
+            try:
+                lower = int(parts[0])
+                upper = int(parts[1])
+            except ValueError:
+                await ctx.send(
+                    _("{author.mention} Invalid range format. Use `lower-upper`, e.g. `50-60`.").format(
+                        author=author
+                    )
+                )
+                return
+            if lower >= upper:
+                await ctx.send(
+                    _("{author.mention} The lower number must be less than the upper number.").format(
+                        author=author
+                    )
+                )
+                return
+            if upper > MAX_ROLL:
+                await ctx.send(
+                    _("{author.mention} Max allowed number is {maxamount}.").format(
+                        author=author, maxamount=humanize_number(MAX_ROLL)
+                    )
+                )
+                return
+            n = randint(lower, upper)
             await ctx.send(
                 "{author.mention} :game_die: {n} :game_die:".format(
                     author=author, n=humanize_number(n)
                 )
             )
-        elif number <= 1:
-            await ctx.send(_("{author.mention} Maybe higher than 1? ;P").format(author=author))
         else:
-            await ctx.send(
-                _("{author.mention} Max allowed number is {maxamount}.").format(
-                    author=author, maxamount=humanize_number(MAX_ROLL)
+            try:
+                number = int(number)
+            except ValueError:
+                await ctx.send(
+                    _("{author.mention} That doesn't look like a valid number.").format(
+                        author=author
+                    )
                 )
-            )
+                return
+            if 1 < number <= MAX_ROLL:
+                n = randint(1, number)
+                await ctx.send(
+                    "{author.mention} :game_die: {n} :game_die:".format(
+                        author=author, n=humanize_number(n)
+                    )
+                )
+            elif number <= 1:
+                await ctx.send(_("{author.mention} Maybe higher than 1? ;P").format(author=author))
+            else:
+                await ctx.send(
+                    _("{author.mention} Max allowed number is {maxamount}.").format(
+                        author=author, maxamount=humanize_number(MAX_ROLL)
+                    )
+                )
 
     @commands.command()
     async def flip(self, ctx, user: discord.Member = None):
