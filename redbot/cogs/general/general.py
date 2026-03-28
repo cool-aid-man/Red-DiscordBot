@@ -2,7 +2,7 @@ import datetime
 import time
 from enum import Enum
 from random import randint, choice
-from typing import Final
+from typing import Final, Optional
 import urllib.parse
 import aiohttp
 import discord
@@ -121,7 +121,7 @@ class General(commands.Cog):
             await ctx.send(choice(choices))
 
     @commands.command()
-    async def roll(self, ctx, number: RollParser = RollParser(100)):
+    async def roll(self, ctx, number: Optional[RollParser] = None):
         """Roll a random number.
 
         The result will be between 1 and `<number>`.
@@ -131,6 +131,7 @@ class General(commands.Cog):
         `<number>` defaults to 100.
         """
         author = ctx.author
+        number = number or RollParser(100)
         if number.low <= 0:
             await ctx.send(
                 _("{author.mention} Maybe higher than {lower}? ;P").format(
