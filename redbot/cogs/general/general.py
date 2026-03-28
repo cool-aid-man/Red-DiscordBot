@@ -41,6 +41,28 @@ class RPSParser:
             self.choice = None
 
 
+class RollParser:
+    def __init__(self, argument):
+        self.low = 1
+        self.high = 100
+
+        if isinstance(argument, int):
+            self.high = argument
+            return
+
+        if not isinstance(argument, str):
+            raise commands.BadArgument()
+
+        argument = argument.strip()
+        if "-" not in argument:
+            self.high = int(argument)
+            return
+
+        low, high = argument.split("-", 1)
+        self.low = int(low)
+        self.high = int(high)
+
+
 MAX_ROLL: Final[int] = 2**63 - 1
 
 
@@ -99,27 +121,39 @@ class General(commands.Cog):
             await ctx.send(choice(choices))
 
     @commands.command()
-    async def roll(self, ctx, number: int = 100):
+    async def roll(self, ctx, number: RollParser = RollParser(100)):
         """Roll a random number.
 
         The result will be between 1 and `<number>`.
 
+        You can also provide a range in the form `<lowest>-<highest>`.
+
         `<number>` defaults to 100.
         """
         author = ctx.author
-        if 1 < number <= MAX_ROLL:
-            n = randint(1, number)
+        if number.low <= 0:
             await ctx.send(
-                "{author.mention} :game_die: {n} :game_die:".format(
-                    author=author, n=humanize_number(n)
+                _("{author.mention} Maybe higher than {lower}? ;P").format(
+                    author=author, lower=humanize_number(number.low)
                 )
             )
-        elif number <= 1:
-            await ctx.send(_("{author.mention} Maybe higher than 1? ;P").format(author=author))
-        else:
+        elif number.high <= number.low:
+            await ctx.send(
+                _("{author.mention} Maybe higher than {lower}? ;P").format(
+                    author=author, lower=humanize_number(number.low)
+                )
+            )
+        elif number.low > MAX_ROLL or number.high > MAX_ROLL:
             await ctx.send(
                 _("{author.mention} Max allowed number is {maxamount}.").format(
                     author=author, maxamount=humanize_number(MAX_ROLL)
+                )
+            )
+        else:
+            n = randint(number.low, number.high)
+            await ctx.send(
+                "{author.mention} :game_die: {n} :game_die:".format(
+                    author=author, n=humanize_number(n)
                 )
             )
 
