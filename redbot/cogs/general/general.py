@@ -103,14 +103,14 @@ class General(commands.Cog):
         """Roll a random number.
 
         The result will be between 1 and `<number>`.
-        You can also specify a range with `<lower>-<upper>`.
+        - You may also specify a range with `<lower>-<upper>`.
 
         `<number>` defaults to 100.
 
         **Examples:**
-            - `[p]roll` - Rolls 1 to 100
-            - `[p]roll 50` - Rolls 1 to 50
-            - `[p]roll 50-60` - Rolls 50 to 60
+        - `[p]roll` - Rolls 1 to 100
+        - `[p]roll 50` - Rolls 1 to 50
+        - `[p]roll 50-60` - Rolls 50 to 60
         """
         author = ctx.author
 
